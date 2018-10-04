@@ -14,14 +14,16 @@ mod watcher;
 
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, Condvar};
-use std::collections::VecDeque;
 
 use futures::{Async, Poll, Stream};
 
 use backend::prelude::*;
+use backend::Buffer;
 use watcher::FsEventWatcher;
 
-pub type WaitQueue = Arc<(Mutex<VecDeque<Event>>, Condvar)>;
+const BACKEND_NAME: &str = "fsevent";
+
+pub type WaitQueue = Arc<(Mutex<Buffer>, Condvar)>;
 
 pub struct Backend {
     watcher: FsEventWatcher,
@@ -29,12 +31,16 @@ pub struct Backend {
 }
 
 impl NotifyBackend for Backend {
-    fn new(paths: Vec<PathBuf>) -> BackendResult<BoxedBackend> {
-        Ok(Box::new(Backend::new(paths)))
+    fn name() -> &'static str {
+        BACKEND_NAME
     }
 
-    fn caps(&self) -> Vec<Capability> {
-        Self::capabilities()
+    fn new(paths: Vec<PathBuf>) -> NewBackendResult {
+        let queue = Arc::new((Mutex::new(Buffer::new()), Condvar::new()));
+        Ok(Box::new(Backend {
+            watcher: FsEventWatcher::new(paths, queue.clone()),
+            queue: queue,
+        }))
     }
 
     fn capabilities() -> Vec<Capability> {
@@ -47,22 +53,12 @@ impl NotifyBackend for Backend {
         ]
     }
 
-    fn await(&mut self) -> EmptyStreamResult {
+    /*fn await(&mut self) -> EmptyStreamResult {
         let &(ref deque, ref cond) = &*self.queue;
         let guard = deque.lock().unwrap();
 		let result = cond.wait(guard);
         Ok(())
-    }
-}
-
-impl Backend {
-    fn new(paths: Vec<PathBuf>) -> Self {
-        let queue = Arc::new((Mutex::new(VecDeque::new()), Condvar::new()));
-        Backend {
-            watcher: FsEventWatcher::new(paths, queue.clone()),
-            queue: queue,
-        }
-    }
+    }*/
 }
 
 impl Drop for Backend {
@@ -78,10 +74,7 @@ impl Stream for Backend {
     fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
         let &(ref deque, _) = &*self.queue;
         let mut queue = deque.lock().unwrap();
-        match queue.pop_front() {
-            Some(e) => Ok(Async::Ready(Some(e))),
-            None => Ok(Async::NotReady),
-        }
+        queue.poll()
     }
 }
 

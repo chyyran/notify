@@ -10,7 +10,7 @@ use std::ptr;
 use std::thread;
 
 use backend::event::*;
-use super::WaitQueue;
+use super::{BACKEND_NAME, WaitQueue};
 
 use fsevent_rs as fse;
 use fsevent_sys::core_foundation as cf;
@@ -159,7 +159,7 @@ impl Context {
                                            relid: O) {
         let paths = vec![path.to_owned()];
         let relid = relid.into();
-        let event = Event { kind, paths, relid };
+        let event = Event { kind, paths, relid, attrs: AnyMap::new(), source: BACKEND_NAME };
         self.enqueue_event(event);
     }
 

@@ -244,6 +244,9 @@ impl Default for EventKind {
     }
 }
 
+// TODO: Probably should have a builder interface for this
+// It would help making events while setting defaults, but
+// also would safeguard against Event changes in backends.
 /// Notify event.
 #[derive(Clone, Debug)]
 pub struct Event {
