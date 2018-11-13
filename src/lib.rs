@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 //! Cross-platform file system notification library
 //!
 //! Source is on GitHub: https://github.com/passcod/notify
@@ -103,10 +104,12 @@ extern crate winapi;
 extern crate libc;
 extern crate filetime;
 
+extern crate crossbeam;
+
 pub use self::op::Op;
 use std::io;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::Sender;
+use crossbeam::channel::Sender;
 use std::convert::AsRef;
 use std::fmt;
 use std::error::Error as StdError;

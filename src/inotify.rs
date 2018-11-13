@@ -21,7 +21,7 @@ use std::fs::metadata;
 use std::mem;
 use std::os::unix::io::AsRawFd;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::{self, Sender};
+use crossbeam::channel::{self, Sender};
 use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;

@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock, Mutex};
-use std::sync::mpsc::Sender;
+use crossbeam::channel::Sender;
 use std::thread;
 use std::time::{Duration, Instant};
 use super::{Error, RawEvent, DebouncedEvent, op, Result, Watcher, RecursiveMode};

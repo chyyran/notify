@@ -1,6 +1,6 @@
 use super::super::{op, DebouncedEvent};
 
-use std::sync::mpsc;
+use crossbeam::channel::{Receiver, Sender, unbounded};
 use std::thread;
 use std::time::{Duration, Instant};
 use std::sync::{Arc, Condvar, Mutex};
@@ -36,17 +36,17 @@ impl PartialOrd for ScheduledEvent {
 
 struct ScheduleWorker {
     trigger: Arc<Condvar>,
-    request_source: mpsc::Receiver<Action>,
+    request_source: Receiver<Action>,
     schedule: BinaryHeap<ScheduledEvent>,
     ignore: HashSet<u64>,
-    tx: mpsc::Sender<DebouncedEvent>,
+    tx: Sender<DebouncedEvent>,
     operations_buffer: OperationsBuffer,
 }
 
 impl ScheduleWorker {
     fn new(trigger: Arc<Condvar>,
-           request_source: mpsc::Receiver<Action>,
-           tx: mpsc::Sender<DebouncedEvent>,
+           request_source: Receiver<Action>,
+           tx: Sender<DebouncedEvent>,
            operations_buffer: OperationsBuffer)
            -> ScheduleWorker {
         ScheduleWorker {
@@ -157,17 +157,17 @@ impl ScheduleWorker {
 
 pub struct WatchTimer {
     counter: u64,
-    schedule_tx: mpsc::Sender<Action>,
+    schedule_tx: Sender<Action>,
     trigger: Arc<Condvar>,
     delay: Duration,
 }
 
 impl WatchTimer {
-    pub fn new(tx: mpsc::Sender<DebouncedEvent>,
+    pub fn new(tx: Sender<DebouncedEvent>,
                operations_buffer: OperationsBuffer,
                delay: Duration)
                -> WatchTimer {
-        let (schedule_tx, schedule_rx) = mpsc::channel();
+        let (schedule_tx, schedule_rx) = unbounded();
         let trigger = Arc::new(Condvar::new());
 
         let trigger_worker = trigger.clone();

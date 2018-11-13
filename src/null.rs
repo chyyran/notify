@@ -2,7 +2,7 @@
 
 #![allow(unused_variables)]
 
-use std::sync::mpsc::Sender;
+use crossbeam::channel::Sender;
 use std::path::Path;
 use std::time::Duration;
 use super::{RawEvent, DebouncedEvent, Result, Watcher, RecursiveMode};
