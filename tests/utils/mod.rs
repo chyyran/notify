@@ -1,3 +1,5 @@
+extern crate crossbeam;
+
 use notify::*;
 use tempfile::TempDir;
 
@@ -7,9 +9,9 @@ use std::path::PathBuf;
 use std::process;
 use std::sync::{
     atomic::{AtomicBool, Ordering::SeqCst},
-    mpsc::{Receiver, TryRecvError},
     Arc,
 };
+use crossbeam::channel::{Receiver, TryRecvError};
 use std::thread;
 use std::time::{Duration, Instant};
 

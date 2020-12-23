@@ -4,7 +4,7 @@
 
 use super::{DebouncedEvent, RawEvent, RecursiveMode, Result, Watcher};
 use std::path::Path;
-use std::sync::mpsc::Sender;
+use crossbeam::channel::Sender;
 use std::time::Duration;
 
 /// Stub `Watcher` implementation

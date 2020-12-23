@@ -28,7 +28,7 @@ use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use std::path::{Path, PathBuf};
 use std::ptr;
 use std::slice;
-use std::sync::mpsc::{channel, Receiver, Sender};
+use crossbeam::channel::{unbounded, Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -84,7 +84,7 @@ impl ReadDirectoryChangesServer {
         cmd_tx: Sender<Result<PathBuf>>,
         wakeup_sem: HANDLE,
     ) -> Sender<Action> {
-        let (action_tx, action_rx) = channel();
+        let (action_tx, action_rx) = unbounded();
         // it is, in fact, ok to send the semaphore across threads
         let sem_temp = wakeup_sem as u64;
         thread::spawn(move || {
@@ -429,7 +429,7 @@ impl ReadDirectoryChangesWatcher {
         tx: Sender<RawEvent>,
         meta_tx: Sender<MetaEvent>,
     ) -> Result<ReadDirectoryChangesWatcher> {
-        let (cmd_tx, cmd_rx) = channel();
+        let (cmd_tx, cmd_rx) = unbounded();
 
         let wakeup_sem =
             unsafe { synchapi::CreateSemaphoreW(ptr::null_mut(), 0, 1, ptr::null_mut()) };
@@ -455,7 +455,7 @@ impl ReadDirectoryChangesWatcher {
         meta_tx: Sender<MetaEvent>,
         delay: Duration,
     ) -> Result<ReadDirectoryChangesWatcher> {
-        let (cmd_tx, cmd_rx) = channel();
+        let (cmd_tx, cmd_rx) = unbounded();
 
         let wakeup_sem =
             unsafe { synchapi::CreateSemaphoreW(ptr::null_mut(), 0, 1, ptr::null_mut()) };
@@ -524,13 +524,13 @@ impl ReadDirectoryChangesWatcher {
 impl Watcher for ReadDirectoryChangesWatcher {
     fn new_raw(tx: Sender<RawEvent>) -> Result<ReadDirectoryChangesWatcher> {
         // create dummy channel for meta event
-        let (meta_tx, _) = channel();
+        let (meta_tx, _) = unbounded();
         ReadDirectoryChangesWatcher::create(tx, meta_tx)
     }
 
     fn new(tx: Sender<DebouncedEvent>, delay: Duration) -> Result<ReadDirectoryChangesWatcher> {
         // create dummy channel for meta event
-        let (meta_tx, _) = channel();
+        let (meta_tx, _) = unbounded();
         ReadDirectoryChangesWatcher::create_debounced(tx, meta_tx, delay)
     }
 

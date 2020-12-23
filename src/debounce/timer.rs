@@ -3,7 +3,7 @@ use super::super::{op, DebouncedEvent};
 use std::collections::VecDeque;
 use std::ops::DerefMut;
 use std::path::PathBuf;
-use std::sync::mpsc;
+use crossbeam::channel::Sender;
 use std::sync::{
     atomic::{self, AtomicBool},
     Arc, Condvar, Mutex,
@@ -24,7 +24,7 @@ struct ScheduleWorker {
     new_event_trigger: Arc<Condvar>,
     stop_trigger: Arc<Condvar>,
     events: Arc<Mutex<VecDeque<ScheduledEvent>>>,
-    tx: mpsc::Sender<DebouncedEvent>,
+    tx: Sender<DebouncedEvent>,
     operations_buffer: OperationsBuffer,
     stopped: Arc<AtomicBool>,
 }
@@ -139,7 +139,7 @@ pub struct WatchTimer {
 
 impl WatchTimer {
     pub fn new(
-        tx: mpsc::Sender<DebouncedEvent>,
+        tx: Sender<DebouncedEvent>,
         operations_buffer: OperationsBuffer,
         delay: Duration,
     ) -> WatchTimer {

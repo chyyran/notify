@@ -27,7 +27,7 @@ use std::path::{Path, PathBuf};
 use std::ptr;
 use std::slice;
 use std::str::from_utf8;
-use std::sync::mpsc::{channel, Receiver, Sender};
+use crossbeam::channel::{unbounded, Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -188,7 +188,7 @@ impl FsEventWatcher {
         }
 
         // done channel is used to sync quit status of runloop thread
-        let (done_tx, done_rx) = channel();
+        let (done_tx, done_rx) = unbounded();
 
         let info = StreamContextInfo {
             event_tx: self.event_tx.clone(),
@@ -221,7 +221,7 @@ impl FsEventWatcher {
         // move into thread
         let dummy = stream as usize;
         // channel to pass runloop around
-        let (rl_tx, rl_rx) = channel();
+        let (rl_tx, rl_rx) = unbounded();
 
         thread::spawn(move || {
             let stream = dummy as *mut raw::c_void;
@@ -416,7 +416,7 @@ fn test_fsevent_watcher_drop() {
     use super::*;
     use std::time::Duration;
 
-    let (tx, rx) = channel();
+    let (tx, rx) = unbounded();
 
     {
         let mut watcher: RecommendedWatcher = Watcher::new_raw(tx).unwrap();

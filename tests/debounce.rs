@@ -2,21 +2,22 @@
 
 extern crate notify;
 extern crate tempfile;
+extern crate crossbeam;
 
 #[macro_use]
 mod utils;
 
 use notify::*;
-use std::sync::mpsc;
 use std::thread;
 use std::time::{Duration, Instant};
 use utils::*;
+use crossbeam::channel::{unbounded, Receiver, TryRecvError};
 
 const DELAY_MS: u64 = 1000;
 const TIMEOUT_MS: u64 = 1000;
 const TEMP_DIR: &str = "temp_dir";
 
-fn recv_events_debounced(rx: &mpsc::Receiver<DebouncedEvent>) -> Vec<DebouncedEvent> {
+fn recv_events_debounced(rx: &Receiver<DebouncedEvent>) -> Vec<DebouncedEvent> {
     let start = Instant::now();
 
     let mut events = Vec::new();
@@ -24,7 +25,7 @@ fn recv_events_debounced(rx: &mpsc::Receiver<DebouncedEvent>) -> Vec<DebouncedEv
     while start.elapsed() < Duration::from_millis(DELAY_MS + TIMEOUT_MS) {
         match rx.try_recv() {
             Ok(event) => events.push(event),
-            Err(mpsc::TryRecvError::Empty) => (),
+            Err(TryRecvError::Empty) => (),
             Err(e) => panic!("unexpected channel err: {:?}", e),
         }
         thread::sleep(Duration::from_millis(50));
@@ -41,7 +42,7 @@ fn create_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -67,7 +68,7 @@ fn write_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -96,7 +97,7 @@ fn write_long_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -147,7 +148,7 @@ fn modify_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -184,7 +185,7 @@ fn delete_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -213,7 +214,7 @@ fn rename_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -240,7 +241,7 @@ fn create_write_modify_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -266,7 +267,7 @@ fn create_delete_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -291,7 +292,7 @@ fn delete_create_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -320,7 +321,7 @@ fn create_rename_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -345,7 +346,7 @@ fn create_rename_delete_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -384,7 +385,7 @@ fn create_rename_overwrite_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -423,7 +424,7 @@ fn create_rename_write_create() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -456,7 +457,7 @@ fn create_rename_remove_create() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -505,7 +506,7 @@ fn move_out_sleep_move_in() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -549,7 +550,7 @@ fn move_repeatedly() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -592,7 +593,7 @@ fn write_rename_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -624,7 +625,7 @@ fn rename_write_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -666,7 +667,7 @@ fn truncate_write_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -700,7 +701,7 @@ fn modify_rename_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -744,7 +745,7 @@ fn rename_modify_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -789,7 +790,7 @@ fn rename_rename_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -820,7 +821,7 @@ fn write_delete_file() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -849,7 +850,7 @@ fn create_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -874,7 +875,7 @@ fn create_directory_watch_subdirectories() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -920,7 +921,7 @@ fn modify_directory() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -957,7 +958,7 @@ fn delete_directory() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -986,7 +987,7 @@ fn rename_directory() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1013,7 +1014,7 @@ fn create_modify_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1038,7 +1039,7 @@ fn create_delete_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1063,7 +1064,7 @@ fn delete_create_directory() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1092,7 +1093,7 @@ fn create_rename_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1117,7 +1118,7 @@ fn create_rename_delete_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1150,7 +1151,7 @@ fn create_rename_overwrite_directory() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1189,7 +1190,7 @@ fn modify_rename_directory() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1234,7 +1235,7 @@ fn rename_modify_directory() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1296,7 +1297,7 @@ fn rename_rename_directory() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1327,7 +1328,7 @@ fn modify_delete_directory() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1373,7 +1374,7 @@ fn move_in_directory_watch_subdirectories() {
 
     sleep_macos(35_000);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1407,7 +1408,7 @@ fn rename_create_remove_temp_file() {
     tdir.create("file1");
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1441,7 +1442,7 @@ fn rename_rename_remove_temp_file() {
     tdir.create("file3");
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     watcher
@@ -1480,7 +1481,7 @@ fn rename_rename_remove_temp_file() {
 
 #[test]
 fn watcher_terminates() {
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(DELAY_MS))
         .expect("failed to create debounced watcher");
     let thread = thread::spawn(move || {
@@ -1501,7 +1502,7 @@ fn one_file_many_events() {
         .expect("failed to create temporary directory");
     let dir = tdir.path();
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new(tx, delay).expect("failed to create debounced watcher");
 
@@ -1544,7 +1545,7 @@ fn delay_zero() {
 
     tdir.create("file1");
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new(tx, Duration::from_secs(0)).expect("failed to create debounced watcher");
     watcher

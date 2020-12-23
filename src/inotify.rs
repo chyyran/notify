@@ -21,7 +21,7 @@ use std::fs::metadata;
 use std::mem;
 use std::os::unix::io::AsRawFd;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::{self, Sender};
+use crossbeam::channel::{self, Sender};
 use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
@@ -443,7 +443,7 @@ impl Watcher for INotifyWatcher {
         let inotify = Inotify::init()?;
         let event_tx = EventTx::Raw { tx };
         let event_loop = EventLoop::new(inotify, event_tx)?;
-        let channel = event_loop.channel();
+        let channel = event_loop.unbounded();
         event_loop.run();
         Ok(INotifyWatcher(Mutex::new(channel)))
     }
@@ -455,7 +455,7 @@ impl Watcher for INotifyWatcher {
             debounce: Debounce::new(delay, tx),
         };
         let event_loop = EventLoop::new(inotify, event_tx)?;
-        let channel = event_loop.channel();
+        let channel = event_loop.unbounded();
         event_loop.run();
         Ok(INotifyWatcher(Mutex::new(channel)))
     }
@@ -467,7 +467,7 @@ impl Watcher for INotifyWatcher {
             let p = try!(env::current_dir().map_err(Error::Io));
             p.join(path)
         };
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let msg = EventLoopMsg::AddWatch(pb, recursive_mode, tx);
 
         // we expect the event loop to live and reply => unwraps must not panic
@@ -482,7 +482,7 @@ impl Watcher for INotifyWatcher {
             let p = try!(env::current_dir().map_err(Error::Io));
             p.join(path)
         };
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let msg = EventLoopMsg::RemoveWatch(pb, tx);
 
         // we expect the event loop to live and reply => unwraps must not panic

@@ -1,13 +1,14 @@
 extern crate notify;
+extern crate crossbeam;
 
 use notify::{RecommendedWatcher, RecursiveMode, Watcher};
 use std::path::Path;
-use std::sync::mpsc::channel;
+use crossbeam::channel::unbounded;
 use std::time::Duration;
 
 fn watch<P: AsRef<Path>>(path: P) -> notify::Result<()> {
     // Create a channel to receive the events.
-    let (tx, rx) = channel();
+    let (tx, rx) = unbounded();
 
     // Automatically select the best implementation for your platform.
     // You can also access each implementation directly e.g. INotifyWatcher.

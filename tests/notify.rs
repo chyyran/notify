@@ -1,12 +1,12 @@
 extern crate notify;
 extern crate tempfile;
+extern crate crossbeam;
 
 mod utils;
 
 use notify::*;
 use std::path::PathBuf;
-use std::sync::mpsc;
-
+use crossbeam::channel::unbounded;
 use utils::*;
 
 const TEMP_DIR: &str = "temp_dir";
@@ -43,7 +43,7 @@ fn create_file() {
     // macOS FsEvent needs some time to discard old events from its log.
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -86,7 +86,7 @@ fn write_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -132,7 +132,7 @@ fn modify_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -176,7 +176,7 @@ fn delete_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -213,7 +213,7 @@ fn rename_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -265,7 +265,7 @@ fn move_out_create_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -319,7 +319,7 @@ fn create_write_modify_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -377,7 +377,7 @@ fn create_rename_overwrite_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -435,7 +435,7 @@ fn rename_rename_file() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -484,7 +484,7 @@ fn create_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -515,7 +515,7 @@ fn create_directory_watch_subdirectories() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -578,7 +578,7 @@ fn modify_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -624,7 +624,7 @@ fn delete_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -661,7 +661,7 @@ fn rename_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -713,7 +713,7 @@ fn move_out_create_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -762,7 +762,7 @@ fn move_in_directory_watch_subdirectories() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -835,7 +835,7 @@ fn create_rename_overwrite_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher
@@ -884,7 +884,7 @@ fn rename_rename_directory() {
 
     sleep_macos(10);
 
-    let (tx, rx) = mpsc::channel();
+    let (tx, rx) = unbounded();
     let mut watcher: RecommendedWatcher =
         Watcher::new_raw(tx).expect("failed to create recommended watcher");
     watcher

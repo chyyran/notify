@@ -2,6 +2,7 @@
 
 extern crate notify;
 extern crate tempfile;
+extern crate crossbeam;
 
 mod utils;
 
@@ -10,7 +11,7 @@ const TEMP_DIR: &str = "temp_dir";
 #[cfg(all(target_os = "macos", feature = "timing_tests"))]
 mod timing_tests {
     use notify::*;
-    use std::sync::mpsc;
+    use crossbeam::channel::unbounded;
 
     use utils::*;
 
@@ -25,7 +26,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -58,7 +59,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -91,7 +92,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -124,7 +125,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -157,7 +158,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -190,7 +191,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -223,7 +224,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -256,7 +257,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -291,7 +292,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -325,7 +326,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -365,7 +366,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -405,7 +406,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -442,7 +443,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -486,7 +487,7 @@ mod timing_tests {
 
         sleep(10);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher
@@ -530,7 +531,7 @@ mod timing_tests {
 
         sleep(40_000);
 
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = unbounded();
         let mut watcher: RecommendedWatcher =
             Watcher::new_raw(tx).expect("failed to create recommended watcher");
         watcher

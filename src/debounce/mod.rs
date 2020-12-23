@@ -8,7 +8,7 @@ use self::timer::WatchTimer;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::mpsc;
+use crossbeam::channel::{unbounded, Sender, Receiver};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -17,14 +17,14 @@ pub type OperationsBuffer = Arc<Mutex<OperationsBufferInner>>;
 
 pub enum EventTx {
     Raw {
-        tx: mpsc::Sender<RawEvent>,
+        tx: Sender<RawEvent>,
     },
     Debounced {
-        tx: mpsc::Sender<DebouncedEvent>,
+        tx: Sender<DebouncedEvent>,
         debounce: Debounce,
     },
     DebouncedTx {
-        tx: mpsc::Sender<DebouncedEvent>,
+        tx: Sender<DebouncedEvent>,
     },
 }
 
@@ -74,7 +74,7 @@ impl EventTx {
 }
 
 pub struct Debounce {
-    tx: mpsc::Sender<DebouncedEvent>,
+    tx: Sender<DebouncedEvent>,
     operations_buffer: OperationsBuffer,
     rename_path: Option<PathBuf>,
     rename_cookie: Option<u32>,
@@ -82,7 +82,7 @@ pub struct Debounce {
 }
 
 impl Debounce {
-    pub fn new(delay: Duration, tx: mpsc::Sender<DebouncedEvent>) -> Debounce {
+    pub fn new(delay: Duration, tx: Sender<DebouncedEvent>) -> Debounce {
         let operations_buffer: OperationsBuffer = Arc::new(Mutex::new(HashMap::new()));
 
         // spawns new thread

@@ -23,12 +23,12 @@
 //! extern crate notify;
 //!
 //! use notify::{Watcher, RecursiveMode, watcher};
-//! use std::sync::mpsc::channel;
+//! use crossbeam::channel::unbounded;
 //! use std::time::Duration;
 //!
 //! fn main() {
 //!     // Create a channel to receive the events.
-//!     let (tx, rx) = channel();
+//!     let (tx, rx) = unbounded();
 //!
 //!     // Create a watcher object, delivering debounced events.
 //!     // The notification back-end is selected based on the platform.
@@ -56,13 +56,14 @@
 //!
 //! ```no_run
 //! extern crate notify;
+//! extern crate crossbeam;
 //!
 //! use notify::{Watcher, RecursiveMode, RawEvent, raw_watcher};
-//! use std::sync::mpsc::channel;
+//! use crossbeam::channel::unbounded;
 //!
 //! fn main() {
 //!     // Create a channel to receive the events.
-//!     let (tx, rx) = channel();
+//!     let (tx, rx) = unbounded();
 //!
 //!     // Create a watcher object, delivering raw events.
 //!     // The notification back-end is selected based on the platform.
@@ -103,6 +104,8 @@ extern crate mio_extras;
 #[cfg(target_os = "windows")]
 extern crate winapi;
 
+extern crate crossbeam;
+
 pub use self::op::Op;
 use std::convert::AsRef;
 use std::error::Error as StdError;
@@ -110,8 +113,9 @@ use std::fmt;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::result::Result as StdResult;
-use std::sync::mpsc::Sender;
 use std::time::Duration;
+
+use crossbeam::channel::Sender;
 
 #[cfg(target_os = "macos")]
 pub use self::fsevent::FsEventWatcher;
